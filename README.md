@@ -2,6 +2,8 @@
 
 단일 전신 사진 기반 3D 아바타 재구성, 3D 의류 자동 피팅, 웹 360도 렌더링 목표의 가상 피팅 플랫폼 설계 저장소
 
+현재 상태: 설계 문서 중심  
+상세 설계 기준 문서: [plan.md](./plan.md)
 
 ## Table of Contents
 
@@ -301,7 +303,7 @@ sequenceDiagram
     participant Redis as Redis Queue
     participant GPU as GPU Worker
     participant Blender as Blender Worker
-    participant Opt as Optimizer Worker
+    participant OptimizerWorker as Optimizer Worker
 
     User->>Web: 전신 사진 선택
     Web->>API: POST /v1/uploads/presign
@@ -330,9 +332,9 @@ sequenceDiagram
     Blender->>Storage: intermediate result 저장
     Blender->>Redis: optimize task enqueue
 
-    Redis->>Opt: optimize task
-    Opt->>Storage: final.glb 저장
-    Opt->>API: completed 상태 업데이트
+    Redis->>OptimizerWorker: optimize task
+    OptimizerWorker->>Storage: final.glb 저장
+    OptimizerWorker->>API: completed 상태 업데이트
     API-->>Web: completed event
     Web->>Storage: final.glb 로드
     Web-->>User: 3D viewer 출력
@@ -1379,46 +1381,3 @@ flowchart LR
 - texture 품질 향상
 - multi-view 입력 검토
 - size recommendation 보조 기능
-
-## 24. Recommended Build Order
-
-### Recommended Sequence
-
-1. CLI 기반 body reconstruction pipeline 구현
-2. canonical body + measurement extraction 검증
-3. garment 1종 fast fit 구현
-4. intermediate `.glb` export 검증
-5. R3F viewer 렌더 확인
-6. FastAPI + Redis + Mongo + object storage 연결
-7. 업로드 UI 및 상태 UI 연결
-8. garment catalog 확장
-9. optimizer, observability, admin tooling 추가
-
-### Why This Order
-
-- 핵심 불확실성의 조기 검증 목적
-- 프론트 선행 개발 리스크 최소화 목적
-- body quality와 fitting feasibility의 우선 검증 중요
-
-## 25. Core Risks
-
-### Structural Risks
-
-- 단일 이미지 입력의 본질적 한계
-- loose clothing에 따른 체형 추정 왜곡
-- garment 자산 품질 편차
-- Blender cloth simulation의 성능/안정성
-- 모바일 렌더링 성능 문제
-
-### Product Risks
-
-- 사용자의 실제 사이즈 추천 오해 가능성
-- 저품질 입력 과다 허용 시 만족도 급락 가능성
-- 결과 설명 문구의 정확성 부족 시 신뢰 하락 위험
-
-### Operational Risks
-
-- GPU 단일 병목
-- queue 적체
-- 대용량 asset storage 비용 증가
-- garment별 실패율 편차
