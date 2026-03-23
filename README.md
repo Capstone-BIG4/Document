@@ -2,9 +2,6 @@
 
 단일 전신 사진 기반 3D 아바타 재구성, 3D 의류 자동 피팅, 웹 360도 렌더링 목표의 가상 피팅 플랫폼 설계 저장소
 
-현재 상태: 설계 문서 중심  
-상세 설계 기준 문서: [plan.md](./plan.md)
-
 ## Table of Contents
 
 - [1. Repository Status](#1-repository-status)
